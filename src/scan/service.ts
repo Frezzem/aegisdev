@@ -4,12 +4,7 @@ import {
   isAgentConfigPath,
   SCAN_EXCLUDE_GLOB,
 } from "../config.js";
-import {
-  aggregateRisk,
-  countSeverities,
-  scanContent,
-  severityRank,
-} from "../core/unicode.js";
+import { countSeverities, scanContent, severityRank } from "../core/unicode.js";
 import type { FileScanResult, ScanReport, Severity } from "../core/types.js";
 
 export interface ScanTarget {

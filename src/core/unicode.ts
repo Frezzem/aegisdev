@@ -124,7 +124,6 @@ export function scanContent(
   languageHint = "plaintext",
 ): FileScanResult {
   const findings: UnicodeFinding[] = [];
-  const lineStarts = computeLineStarts(text);
   let lineNumber = 1;
   let lineStart = 0;
   let lineIndex = 0;
@@ -137,7 +136,7 @@ export function scanContent(
     const line = text.slice(lineIndex, lineEnd).replace(/\r$/, "");
     lineStart = lineIndex;
 
-    scanLine(text, line, file, lineNumber, lineStart, lineEnd, findings);
+    scanLine(line, file, lineNumber, lineStart, findings);
     if (findings.length >= MAX_FINDINGS_PER_FILE) {
       break;
     }
@@ -162,12 +161,10 @@ export function scanContent(
   };
 
   function scanLine(
-    fullText: string,
     line: string,
     displayFile: string,
     lineNo: number,
     absoluteStart: number,
-    _absoluteEnd: number,
     out: UnicodeFinding[],
   ): void {
     let i = 0;
@@ -539,16 +536,6 @@ function makeFinding(input: FindingInput): UnicodeFinding {
   };
 }
 
-function computeLineStarts(text: string): number[] {
-  const starts = [0];
-  for (let i = 0; i < text.length; i += 1) {
-    if (text[i] === "\n") {
-      starts.push(i + 1);
-    }
-  }
-  return starts;
-}
-
 function consumeRun(
   line: string,
   start: number,
@@ -598,6 +585,3 @@ export function scorePayload(payload: string): "high" | "medium" | "none" {
   }
   return "none";
 }
-
-// Kept exported for tests / future diagnostics.
-export const __internal = { lineStarts: computeLineStarts, named: NAMED };

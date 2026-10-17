@@ -1,0 +1,257 @@
+{
+  "name": "aegisdev",
+  "displayName": "AegisDev",
+  "description": "在安装依赖前核验 npm/PyPI 包，并扫描 Agent 配置中的隐藏 Unicode 字符。",
+  "version": "1.0.0",
+  "publisher": "aegisdev",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Linters",
+    "Security",
+    "Other"
+  ],
+  "keywords": [
+    "security",
+    "ai",
+    "supply-chain",
+    "mcp",
+    "unicode",
+    "prompt-injection",
+    "cursor",
+    "copilot"
+  ],
+  "icon": "media/aegis-icon.png",
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "aegis.verifyPackage",
+        "title": "校验依赖包（幻觉包 / 投毒包）",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.verifyAndInstall",
+        "title": "校验并安全安装依赖",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.scanAgentConfigs",
+        "title": "扫描 Agent 配置隐藏字符",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.scanCurrentFile",
+        "title": "扫描当前文件的隐藏字符",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.openDashboard",
+        "title": "打开 Aegis 安全面板",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.openReport",
+        "title": "打开最近一次安全报告",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.refreshDashboard",
+        "title": "刷新 Aegis 面板",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.openSettings",
+        "title": "打开 Aegis 设置",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.showOutput",
+        "title": "查看运行日志",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.previewSanitized",
+        "title": "预览净化结果",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.sanitizeFile",
+        "title": "净化文件中的隐藏字符",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.sanitizeAll",
+        "title": "净化全部受影响的配置文件",
+        "category": "Aegis"
+      },
+      {
+        "command": "aegis.removeFinding",
+        "title": "移除单处隐藏字符",
+        "category": "Aegis"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aegis",
+          "title": "AegisDev",
+          "icon": "media/activity.svg"
+        }
+      ]
+    },
+    "views": {
+      "aegis": [
+        {
+          "id": "aegis.dashboard",
+          "name": "安全护栏",
+          "type": "tree",
+          "icon": "media/activity.svg",
+          "contextualTitle": "AegisDev"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "aegis.dashboard",
+        "contents": "AegisDev 正在保护当前工作区。\n\n[校验依赖包](command:aegis.verifyPackage)\n[扫描 Agent 配置](command:aegis.scanAgentConfigs)\n\n按团队安全基线配置[白名单与超时](command:aegis.openSettings)。"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "aegis.refreshDashboard",
+          "when": "view == aegis.dashboard",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "aegis.scanCurrentFile",
+          "when": "editorTextFocus",
+          "group": "aegis@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "aegis.removeFinding",
+          "when": "false"
+        },
+        {
+          "command": "aegis.previewSanitized",
+          "when": "false"
+        },
+        {
+          "command": "aegis.sanitizeFile",
+          "when": "false"
+        },
+        {
+          "command": "aegis.sanitizeAll",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "AegisDev",
+      "properties": {
+        "aegis.requestTimeoutMs": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 500,
+          "maximum": 10000,
+          "description": "单个外部 API 请求的超时上限（毫秒）。默认 2 秒，避免阻塞开发流程。",
+          "scope": "application"
+        },
+        "aegis.scanOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "打开工作区后自动扫描 Agent 配置文件中的隐藏 Unicode 字符。",
+          "scope": "application"
+        },
+        "aegis.scanOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "保存 .mcp.json / .cursorrules 等 Agent 配置时自动重新扫描。",
+          "scope": "application"
+        },
+        "aegis.maxScanFiles": {
+          "type": "number",
+          "default": 300,
+          "minimum": 10,
+          "maximum": 2000,
+          "description": "单次工作区扫描的最大配置文件数量。",
+          "scope": "application"
+        },
+        "aegis.minWeeklyDownloads": {
+          "type": "number",
+          "default": 100,
+          "minimum": 0,
+          "description": "低于该周下载量的新包会被标记为高风险。",
+          "scope": "application"
+        },
+        "aegis.typosquatGuard": {
+          "type": "boolean",
+          "default": true,
+          "description": "检测与热门包仅差 1-2 个字符的疑似抢注 / 幻觉包。",
+          "scope": "application"
+        },
+        "aegis.githubToken": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "可选的 GitHub Token，仅用于提升仓库 Star 查询的速率上限。不会上传任何代码。",
+          "scope": "application"
+        },
+        "aegis.allowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "企业内部可信包白名单。支持包名或 scope/*（例如 @company/*）。命中后跳过外部核验。",
+          "scope": "application"
+        },
+        "aegis.blocklist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "强制阻断的包名或 scope/*。优先级高于白名单。",
+          "scope": "application"
+        },
+        "aegis.npmRegistry": {
+          "type": "string",
+          "default": "https://registry.npmjs.org",
+          "description": "NPM Registry 地址。私有镜像只会上传包名，不上传代码。",
+          "scope": "application"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "package": "npm run build && vsce package --no-dependencies --out aegisdev-1.0.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.2.1",
+    "typescript": "^5.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Frezzem/aegisdev.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Frezzem/aegisdev/issues"
+  },
+  "homepage": "https://github.com/Frezzem/aegisdev#readme"
+}
